@@ -10,6 +10,17 @@ from ..config import COMPANY_ID, get_api_client
 from ..utils import get_payment_info
 
 
+def _get_full_invoice_number(inv) -> str:
+    """
+    Restituisce il numero fattura completo con numerazione.
+    Es: "19" + "/g" = "19/g"
+    """
+    number = str(inv.number) if inv.number else "N/A"
+    if inv.numeration:
+        return f"{number}{inv.numeration}"
+    return number
+
+
 async def handle_get_clients(arguments: dict) -> list[TextContent]:
     """Lista clienti."""
     name_filter = arguments.get("name")
@@ -196,7 +207,7 @@ async def handle_get_client_invoices(arguments: dict) -> list[TextContent]:
 
                 for inv in invoices:
                     pay_info = get_payment_info(inv)
-                    output += f"- ID {inv.id} - N. {inv.number or 'N/A'} del {inv.var_date or 'N/A'}\n"
+                    output += f"- ID {inv.id} - N. {_get_full_invoice_number(inv)} del {inv.var_date or 'N/A'}\n"
 
                     # Importi con dettaglio
                     output += f"  Imponibile: {inv.amount_net or 0:.2f} EUR\n"

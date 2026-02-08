@@ -10,6 +10,17 @@ from ..config import COMPANY_ID, get_api_client
 from ..utils import get_payment_info
 
 
+def _get_full_invoice_number(inv) -> str:
+    """
+    Restituisce il numero fattura completo con numerazione.
+    Es: "19" + "/g" = "19/g"
+    """
+    number = str(inv.number) if inv.number else "N/A"
+    if inv.numeration:
+        return f"{number}{inv.numeration}"
+    return number
+
+
 async def handle_get_invoices(arguments: dict) -> list[TextContent]:
     """Lista fatture emesse con filtri."""
     status = arguments.get("status")
@@ -84,7 +95,7 @@ async def handle_get_invoices(arguments: dict) -> list[TextContent]:
                 for inv in filtered_invoices:
                     pay_info = get_payment_info(inv)
 
-                    output += f"- ID {inv.id} - N. {inv.number or 'N/A'} del {inv.var_date or 'N/A'}\n"
+                    output += f"- ID {inv.id} - N. {_get_full_invoice_number(inv)} del {inv.var_date or 'N/A'}\n"
 
                     # Cliente con dettagli
                     if inv.entity:
@@ -159,7 +170,7 @@ async def handle_get_invoice(arguments: dict) -> list[TextContent]:
 
             pay_info = get_payment_info(inv)
 
-            output = f"FATTURA #{inv.number or 'N/A'} - ID {inv.id}\n"
+            output = f"FATTURA #{_get_full_invoice_number(inv)} - ID {inv.id}\n"
             output += f"{'=' * 60}\n\n"
 
             # Tipo e numerazione

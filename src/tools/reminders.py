@@ -18,6 +18,17 @@ from ..config import COMPANY_ID, get_api_client
 from ..utils import get_payment_info
 
 
+def _get_full_invoice_number(inv) -> str:
+    """
+    Restituisce il numero fattura completo con numerazione.
+    Es: "19" + "/g" = "19/g"
+    """
+    number = str(inv.number) if inv.number else "N/A"
+    if inv.numeration:
+        return f"{number}{inv.numeration}"
+    return number
+
+
 def _fetch_all_issued_documents(api, from_date: str, to_date: str, doc_types: list) -> list:
     """Helper per recuperare tutti i documenti emessi con paginazione."""
     all_docs = []
@@ -106,7 +117,7 @@ def _apply_netting_fifo(overdue_items: list, credit_notes: list) -> tuple[list, 
                 total_nc_credit -= remaining
                 netting_details.append({
                     "invoice": inv,
-                    "invoice_number": inv.number,
+                    "invoice_number": _get_full_invoice_number(inv),
                     "invoice_date": str(inv.var_date) if inv.var_date else None,
                     "due_date": item["pay_info"]["due_date"],
                     "original_remaining": remaining,
@@ -121,7 +132,7 @@ def _apply_netting_fifo(overdue_items: list, credit_notes: list) -> tuple[list, 
                 new_remaining = remaining - total_nc_credit
                 netting_details.append({
                     "invoice": inv,
-                    "invoice_number": inv.number,
+                    "invoice_number": _get_full_invoice_number(inv),
                     "invoice_date": str(inv.var_date) if inv.var_date else None,
                     "due_date": item["pay_info"]["due_date"],
                     "original_remaining": remaining,
@@ -196,8 +207,9 @@ async def handle_get_overdue_invoices_with_netting(arguments: dict) -> list[Text
             # Helper per formattare una fattura
             def format_invoice_line(item):
                 inv = item["invoice"]
+                full_number = _get_full_invoice_number(inv)
                 lines = []
-                lines.append(f"  - N. {inv.number} | {inv.entity.name if inv.entity else 'N/A'}")
+                lines.append(f"  - N. {full_number} | {inv.entity.name if inv.entity else 'N/A'}")
                 lines.append(f"    Emissione: {inv.var_date} | Scadenza: {item['pay_info']['due_date']} ({item['days_overdue']} gg)")
                 lines.append(f"    Da incassare: {item['pay_info']['remaining']:.2f} EUR")
                 return "\n".join(lines)
@@ -263,7 +275,8 @@ async def handle_get_overdue_invoices_with_netting(arguments: dict) -> list[Text
                             output += f"    Compensata con NC:\n"
                             for cn in n['credit_notes_used']:
                                 cn_amount = abs(cn.amount_net or 0)
-                                output += f"      • NC {cn.number} del {cn.var_date} - {cn_amount:.2f} EUR\n"
+                                cn_full_number = _get_full_invoice_number(cn)
+                                output += f"      • NC {cn_full_number} del {cn.var_date} - {cn_amount:.2f} EUR\n"
                                 if cn.subject:
                                     output += f"        ({cn.subject[:50]}{'...' if len(cn.subject) > 50 else ''})\n"
                     output += "\n"
@@ -284,7 +297,8 @@ async def handle_get_overdue_invoices_with_netting(arguments: dict) -> list[Text
                             output += f"    Compensata con NC:\n"
                             for cn in n['credit_notes_used']:
                                 cn_amount = abs(cn.amount_net or 0)
-                                output += f"      • NC {cn.number} del {cn.var_date} - {cn_amount:.2f} EUR\n"
+                                cn_full_number = _get_full_invoice_number(cn)
+                                output += f"      • NC {cn_full_number} del {cn.var_date} - {cn_amount:.2f} EUR\n"
                     output += "\n"
 
             return [TextContent(type="text", text=output)]
@@ -388,7 +402,7 @@ async def handle_get_aging_report(arguments: dict) -> list[TextContent]:
                 for item in sorted(buckets["90+"]["items"], key=lambda x: x["days_overdue"], reverse=True):
                     inv = item["invoice"]
                     output += f"- {inv.entity.name if inv.entity else 'N/A'}\n"
-                    output += f"  Fattura {inv.number} - {item['days_overdue']} giorni\n"
+                    output += f"  Fattura {_get_full_invoice_number(inv)} - {item['days_overdue']} giorni\n"
                     output += f"  Da incassare: € {item['pay_info']['remaining']:,.2f}\n\n"
 
             return [TextContent(type="text", text=output)]
@@ -506,7 +520,7 @@ async def handle_get_reminder_data(arguments: dict) -> list[TextContent]:
                     output += f"\nDETTAGLIO FATTURE:\n"
                     for item in sorted(items, key=lambda x: x["days_overdue"], reverse=True):
                         inv = item["invoice"]
-                        output += f"  - N. {inv.number} del {inv.var_date}\n"
+                        output += f"  - N. {_get_full_invoice_number(inv)} del {inv.var_date}\n"
                         output += f"    Scadenza: {item['pay_info']['due_date']} ({item['days_overdue']} giorni fa)\n"
                         output += f"    Importo: € {item['pay_info']['remaining']:,.2f}\n"
                         if inv.subject:

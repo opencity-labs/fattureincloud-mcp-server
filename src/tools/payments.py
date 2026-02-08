@@ -10,6 +10,17 @@ from ..config import COMPANY_ID, get_api_client
 from ..utils import get_payment_info
 
 
+def _get_full_invoice_number(inv) -> str:
+    """
+    Restituisce il numero fattura completo con numerazione.
+    Es: "19" + "/g" = "19/g"
+    """
+    number = str(inv.number) if inv.number else "N/A"
+    if inv.numeration:
+        return f"{number}{inv.numeration}"
+    return number
+
+
 async def handle_get_overdue_invoices(arguments: dict) -> list[TextContent]:
     """Fatture scadute non pagate."""
     limit = arguments.get("limit", 50)
@@ -71,7 +82,7 @@ async def handle_get_overdue_invoices(arguments: dict) -> list[TextContent]:
                     if due_date < today:
                         days_overdue = (today - due_date).days
                         overdue.append({
-                            "numero": inv.number,
+                            "numero": _get_full_invoice_number(inv),
                             "data": str(inv.var_date) if inv.var_date else None,
                             "scadenza": pay_info["due_date"],
                             "giorni_ritardo": days_overdue,
