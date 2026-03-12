@@ -131,28 +131,32 @@ async def handle_get_payment_summary(arguments: dict) -> list[TextContent]:
             q = f"date >= '{from_date}' and date <= '{to_date}'"
 
             # Loop paginazione per recuperare TUTTE le fatture
+            # FIX 2026-03-05: iterare sui tipi di documento (type="" non accettato dall'API)
             invoices = []
-            page = 1
+            doc_types = ["invoice", "credit_note", "receipt", "proforma"]
 
-            while True:
-                # Usa type="" (stringa vuota) per recuperare TUTTI i tipi di documento
-                response = api.list_issued_documents(
-                    company_id=COMPANY_ID,
-                    type="",  # Stringa vuota = recupera TUTTI i tipi (invoice, credit_note, etc.)
-                    q=q,
-                    page=page,
-                    per_page=100,
-                    fieldset="detailed"
-                )
+            for doc_type in doc_types:
+                page = 1
+                while True:
+                    try:
+                        response = api.list_issued_documents(
+                            company_id=COMPANY_ID,
+                            type=doc_type,
+                            q=q,
+                            page=page,
+                            per_page=100,
+                            fieldset="detailed"
+                        )
 
-                if response.data:
-                    invoices.extend(response.data)
+                        if response.data:
+                            invoices.extend(response.data)
 
-                # Verifica se ci sono altre pagine
-                if page >= response.last_page:
-                    break
+                        if page >= response.last_page:
+                            break
 
-                page += 1
+                        page += 1
+                    except Exception:
+                        break
 
             # Contatori
             total_invoices = 0
