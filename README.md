@@ -1,5 +1,8 @@
 # FattureInCloud MCP Server
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
+
 Un server [Model Context Protocol](https://modelcontextprotocol.io/) (MCP) completo che collega assistenti AI come Claude alla piattaforma di fatturazione [Fatture in Cloud](https://www.fattureincloud.it/).
 
 **20 tools** organizzati in 7 categorie che vanno ben oltre il semplice wrapping delle API — aggiungendo paginazione automatica, netting delle note di credito, analisi aging, scoring comportamento pagamenti e dati strutturati per i workflow di sollecito.
@@ -282,9 +285,21 @@ Il flusso consigliato per gestire i pagamenti scaduti:
 
 ---
 
+## Come Contribuire
+
+Vedi [CONTRIBUTING.md](CONTRIBUTING.md) per le linee guida.
+
+---
+
+## Changelog
+
+Vedi [CHANGELOG.md](CHANGELOG.md) per la storia delle modifiche.
+
+---
+
 ## Licenza
 
-MIT
+Questo progetto e' distribuito sotto licenza MIT. Vedi [LICENSE](LICENSE) per i dettagli.
 
 ---
 

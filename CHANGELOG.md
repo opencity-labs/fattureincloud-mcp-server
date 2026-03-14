@@ -1,0 +1,30 @@
+# Changelog
+
+Tutte le modifiche rilevanti a questo progetto sono documentate in questo file.
+
+Il formato segue [Keep a Changelog](https://keepachangelog.com/it-IT/1.0.0/)
+e il progetto aderisce al [Semantic Versioning](https://semver.org/lang/it/).
+
+## [1.0.0] - 2026-03-14
+
+### Added
+- **20 tools** organizzati in 7 categorie
+- **Fatture emesse**: lista con filtri e dettaglio singola fattura
+- **Pagamenti**: fatture scadute e dashboard riepilogo pagamenti
+- **Clienti**: anagrafica completa e fatture per cliente
+- **Spese**: fatture ricevute, dettaglio, non pagate, aggregazione mensile
+- **Analytics**: fatturato mensile, per cliente (Pareto), statistiche annuali con breakdown trimestrale
+- **Info azienda**: dati aziende associate all'account
+- **Solleciti e analisi crediti**:
+  - Netting FIFO automatico delle note di credito
+  - Aging report con fasce standard (1-30, 31-60, 61-90, 90+ giorni)
+  - Dati strutturati per generazione solleciti
+  - Analisi comportamento pagamenti cliente (DSO, trend, rating)
+  - Coda priorita' solleciti con score pesato
+- Paginazione automatica su tutte le chiamate API
+- Doppia modalita' di trasporto: stdio e HTTP/SSE
+- Setup OAuth2 interattivo tramite `auth_setup.py`
+- Deploy Docker con Dockerfile pronto
+- Documentazione completa in italiano
+
+[1.0.0]: https://github.com/maxmost-hestro/fattureincloud-mcp-server/releases/tag/v1.0.0
